@@ -1,0 +1,10 @@
+node_modules
+publish
+package-lock.json
+
+.idea/workspace.xml
+
+.cache/
+
+.npm
+.vscode

@@ -1,0 +1,54 @@
+{
+    "hideClock": false,
+    "onlineTime": true,
+    "minSpinTime": 3000,
+    "realityCheck": 3600,
+    "disableSkip": true,
+    "disableShowHistory": false,
+    "autoplayDisable": false,
+    "disableBuyFeature": false,
+    "autoplayRounds": [5, 10, 15, 20, 50, 100],
+    "autoplayInfinite": false,
+    "hideGameRules": false,
+    "quickStop": false,
+    "minSpinTimeIsAverage": false,
+    "displayMaximumPrizeInformation": false,
+    "displayAveragePayout": false,
+    "clockUsesServerTime": false,
+    "disableAnalytics": false,
+    "disableLowWinCelebration": false,
+    "autoplayForceAdvanced": false,
+    "disableAutoBetLowering": false,
+    "disableSkipFeature": false,
+    "autoplayStopOnBonusWin": false,
+    "mandatoryFeatureIntro": false,
+    "mandatoryFeatureOutro": false,
+    "netPosition": false,
+    "disableNearwin": false,
+    "inactiveTime": 0,
+    "gameTranslationJsonUrl": "https://gameres.rgs.slammerstudios.com/translation/roulette/en_GB/f9df609796c6da5d8509130074f5fecf.json",
+    "commonTranslationJsonUrl": "https://gameres.rgs.slammerstudios.com/translation/common/en_GB/2367cc144981773f3b8ccf212ac7c0c1.json",
+    "translateIntoEn": false,
+    "replayInNewTab": true,
+    "gameServerConfig": {
+        "clientInfoApi": "https://launcher.rgstest.slammerstudios.com/bggs/v1/gameclient/info",
+        "gameServer2Api": "wss://gameserv2.rgstest.slammerstudios.com/",
+        "gameServer3Api": "wss://gameserv3.rgstest.slammerstudios.com/",
+        "gameServerApi": "wss://gameserv.rgstest.slammerstudios.com/",
+        "historyApi": "https://launcher.rgstest.slammerstudios.com/bggs/v1/bet/records",
+        "settingApi": "https://launcher.rgstest.slammerstudios.com/bggs/v1/user/setting"
+    },
+    "gameFeature": {
+        "betPattern": [
+            {
+                "name": "default",
+                "type": "normal",
+                "isDefault": true,
+                "mul": 1,
+                "rtp": "97.30"
+            }
+        ],
+        "maxWinMul": 0
+    },
+    "uc": "dtRoa2l4l1o12w5xnFsC"
+}
