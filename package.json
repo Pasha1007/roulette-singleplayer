@@ -6,7 +6,7 @@
     "scripts": {
         "format": "prettier --write .",
         "build": "webpack --mode production --config webpack.build.js",
-        "start": "webpack serve --mode development  --config webpack.dev.js",
+        "start": "npm run build && node integrated-server.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "pawn",
@@ -27,6 +27,7 @@
         "gsap": "^3.12.7",
         "html-loader": "^5.1.0",
         "html-webpack-plugin": "^5.6.3",
+        "http-server": "^14.1.1",
         "less-loader": "^12.2.0",
         "pixi.js": "^7.4.3",
         "pixijs-actions": "^1.2.10",
@@ -39,6 +40,7 @@
     },
     "devDependencies": {
         "@babel/plugin-transform-runtime": "^7.28.0",
+        "archiver": "^7.0.1",
         "core-js": "^3.44.0",
         "file-loader": "^6.2.0",
         "image-webpack-loader": "^8.1.0",

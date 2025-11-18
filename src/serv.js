@@ -1,11 +1,10 @@
 import { urlQuery, fetchGet, generate18MixedRandom } from './utils';
 export default class CasinoBridge {
-    constructor(wss, gameid,dispatchEvent) {
+    constructor(wss, gameid) {
         this.wss = wss;
         this.gameid = gameid;
         this.heartTime = 30000;
         this.socket = null;
-        this.dispatchEvent = dispatchEvent;
         this.status = {
             webSocketState: false,
             lockReconnect: false,
@@ -50,25 +49,17 @@ export default class CasinoBridge {
             if (messobj.msgid === 'gameuserinfo') this.status.gameuserinfo = messobj;
             if (messobj.msgid === 'gamemoduleinfo') {
                 this.slot = messobj;
-                this.dispatchEvent.emit('updata-slotmessage', messobj);
-            }
-            if(messobj.msgid === 'crashinfo'){
-                this.dispatchEvent.emit('updata-crashinfo',messobj);
+                this.status.assetsMessage.map((item, key) => {
+                    if (item.name == 'getServ') item.update();
+                });
             }
             if (messobj.cmdid === 'refresh' && messobj.isok) {
                 this.status.assetsMessage.map((item, key) => {
                     if (item.name == 'getBalance') item.update();
                 });
             }
-            if (messobj.msgid === 'userbaseinfo'){
-                this.status.userbaseinfo = messobj;
-            } 
+            if (messobj.msgid === 'userbaseinfo') this.status.userbaseinfo = messobj;
             if (messobj.msgid === 'gamecfg') this.status.gamecfg = messobj;
-            if(messobj.msgid === 'cmdret' && messobj.cmdid === 'gamectrl3' && messobj.isok){
-                this.status.assetsMessage.map((item, key) => {
-                    if (item.name == 'getServ') item.update();
-                });
-            }
             //init ok
             if (messobj.msgid === 'cmdret' && messobj.cmdid === 'comeingame3' && messobj.isok) {
                 
@@ -95,9 +86,6 @@ export default class CasinoBridge {
                     let strarr = messobj.msgparam.dtapierrcode ? messobj.msgparam.dtapierrcode.split('|') : '';
                     let code = strarr != '' ? strarr[0] : messobj.msgparam.httpcode;
                     let errorCode = `${messobj.msgcode} | ${typeof messobj.msgparam.dtapierrcode != 'undefined' ? messobj.msgparam.dtapierrcode : messobj.msgparam.httpcode}`;
-                    console.log(messobj);
-                } else {
-                    console.log(messobj);
                 }
             }
             //console.log(messobj)
@@ -190,7 +178,7 @@ export default class CasinoBridge {
                 this.socket.send(JSON.stringify(data));
             }
         } catch (e) {
-            console.log(e);
+            // Error sending data
         }
     }
     //Get the history records

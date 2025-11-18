@@ -46,6 +46,8 @@ body {
   top: 0;
   left: 0;
   z-index: 1;
+  background: linear-gradient(135deg, #041510 0%, #0E3D27 50%, #041510 100%);
+  box-shadow: 0 0 100px rgba(0, 0, 0, 0.95), 0 0 60px rgba(0, 0, 0, 0.8), inset 0 0 200px rgba(0, 0, 0, 0.75), inset 0 0 100px rgba(0, 0, 0, 0.65), inset 0 4px 60px rgba(0, 0, 0, 0.85);
 }
 #loading {
   width: 100%;
@@ -56,7 +58,7 @@ body {
   height: 100%;
   overflow: hidden;
   pointer-events: none;
-  background-color: #1c1a35;
+  background: linear-gradient(135deg, #041510 0%, #0E3D27 50%, #041510 100%);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -307,7 +309,7 @@ body {
   width: 95%;
   margin: auto;
   height: 25em;
-  background-color: #1e1a2b;
+  background-color: #0a5c3b;
   backdrop-filter: opacity(1);
   border-radius: 8px;
   padding: 1em 2em;
@@ -479,7 +481,7 @@ body {
   padding-bottom: 0.5em;
 }
 .history-info {
-  background-color: #1f1a2b;
+  background-color: #0a5c3b;
   border-radius: 0.2em;
 }
 .history-info-title,
@@ -500,7 +502,7 @@ body {
   padding-top: unset;
 }
 .history-info-button {
-  background-color: #332943;
+  background-color: #0a5c3b;
   height: 2em;
   display: flex;
   justify-content: center;
@@ -754,7 +756,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  pointer-events: none;
 }
 #header > .devicon,
 #header .menuicon {
@@ -776,7 +777,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: auto;
 }
 #header > .devicon > .menuicon-logo,
 #header .menuicon > .menuicon-logo {
@@ -787,7 +787,6 @@ body {
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  pointer-events: auto;
 }
 #header .menuicon {
   margin-left: unset;

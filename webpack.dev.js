@@ -165,7 +165,8 @@ module.exports = {
         },
         historyApiFallback: true,
         allowedHosts: 'all',
-        port: '8088',
+        port: '5000',
+        webSocketServer: false,
         // inline:true,//
         hot: true, // 
         host: '0.0.0.0',

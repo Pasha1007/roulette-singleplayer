@@ -78,10 +78,9 @@ export default class GameState {
         this.m_eventEmitter.addListener('updata-music', this.OnMusicInfo.bind(this));
         this.m_eventEmitter.addListener('updata-menu', this.OnMenuInfo.bind(this));
         this.m_eventEmitter.addListener('updata-translation', this.OnTranslation.bind(this));
-        this.m_eventEmitter.addListener('updata-crashinfo', this.OnCrashInfo.bind(this));
-        this.m_eventEmitter.addListener('updata-spinEnd', this.OnSpinActionCall.bind(this));
     }
     OnGameCfg(data) {
+        console.log('Server:OnGameCfg', data);
         this.gamecfginit = true;
         if (data.status && data.status.gamecfg && data.status.gamecfg.linebets) {
             let linebets = data.status.gamecfg.linebets;
@@ -106,14 +105,7 @@ export default class GameState {
     OnUpdateBet(data) {
         // console.log('OnUpdateBet', data);
     }
-    OnCrashInfo(msg) {
-        RoomMgr.getInstance().onCrashInfo(msg);
-        
-    }
-    OnSpinActionCall(msg) {
-        RoomMgr.getInstance().onSpinActionCallBack(msg);
-        
-    }
+
     OnSpinRet(msg) {
         RoomMgr.getInstance().onGameModuleInfo(msg);
     }

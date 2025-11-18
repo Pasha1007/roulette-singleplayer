@@ -47,7 +47,13 @@ export default class MainBoard {
         this.boradState = MainBoradType.None;
         this.isTableRect = true;
         this.isChipSelecting = false;
-        this.tempDrawTime = 0;
+
+        // Calculate button position based on screen size (mobile moves to RIGHT)
+        const screenWidth = window.innerWidth || 1024;
+        this.buttonX = isMobile ? 710 : 550;
+        const isMobile = screenWidth <= 768;
+        this.buttonX = isMobile ? 580 : 520; // Move buttons to right on mobile
+
     }
     //To present quickly
     initFastTables() {
@@ -74,7 +80,7 @@ export default class MainBoard {
 
         this.menubtnbg = Sprite.from('menubg2.png');
         this.menubtnbg.anchor.set(0.5, 0.5);
-        this.menubtnbg.position.set(420, -50);
+        this.menubtnbg.position.set(this.buttonX, -50);
         this.menucontainer.addChild(this.menubtnbg);
 
         let lable1 = GameState.getInstance().getLanguage('roulette_ui_1');
@@ -97,8 +103,6 @@ export default class MainBoard {
         this.btnSpinDo = new GameButton('spin', 'spin.png', lable7, new Point(0, 110), this.menucontainer, undefined, 36, true);
 
 
-        let lable8 = GameState.getInstance().getLanguage('roulette_ui_11');
-        this.btnSpinCancel = new GameButton('cancelspin', 'cancel.png', lable8, new Point(0, 110), this.menucontainer, undefined, 36, true);
 
         // Sound control button - only sound icon, no background symbol
         this.isMuted = false; // Initialize sound state
@@ -107,30 +111,25 @@ export default class MainBoard {
         this.btnSoundCtrl = new GameButton('soundcontrol', 'spin.png', soundLabel, new Point(0, 0), this.menucontainer, undefined, 48);
 
 
-        let labletime = GameState.getInstance().getLanguage('roulette_ui_10');
-        this.timeTip = new TimeTip('timetip.png', labletime, new Point(0, 60), this.menucontainer, 42, 36, true);
-        this.timeTip.setPosition(420, 500);
+
 
         this.btnClearBet.onClicked(this.handleButtonClick.bind(this));
         this.btnUndoBet.onClicked(this.handleButtonClick.bind(this));
         this.btnChipChange.onClicked(this.handleButtonClick.bind(this));
         this.btnDoubelBet.onClicked(this.handleButtonClick.bind(this));
         this.btnSpinDo.onClicked(this.handleButtonClick.bind(this));
-        this.btnSpinCancel.onClicked(this.handleButtonClick.bind(this));
+
 
         this.btnSoundCtrl.onClicked(this.handleButtonClick.bind(this));
 
-        this.btnClearBet.setPosition(420, -680);
-        this.btnUndoBet.setPosition(420, -50 - 200);
-        this.btnChipChange.setPosition(420, -50);
-        this.btnDoubelBet.setPosition(420, -50 + 170);
+        this.btnClearBet.setPosition(this.buttonX, -680);
+        this.btnUndoBet.setPosition(this.buttonX, -50 - 200);
+        this.btnChipChange.setPosition(this.buttonX, -50);
+        this.btnDoubelBet.setPosition(this.buttonX, -50 + 170);
 
-        this.btnSoundCtrl.setPosition(420, -850); // Position above CLEAR button
+        this.btnSoundCtrl.setPosition(this.buttonX, -850); // Position above CLEAR button
 
-        this.btnSpinDo.setPosition(420, 680);
-        let autoposi = this.btnSpinDo.getPosition();
-        this.btnSpinCancel.setPosition(autoposi.x, autoposi.y);
-        this.btnSpinCancel.setVisiable(false);
+        this.btnSpinDo.setPosition(this.buttonX, 680);
     }
     initChipBets() {
         this.chipcontainer = new Container();
@@ -138,7 +137,7 @@ export default class MainBoard {
 
         let chipbtnbg = Sprite.from('menubg1.png');
         chipbtnbg.anchor.set(0.5, 0.5);
-        chipbtnbg.position.set(420, -50);
+        chipbtnbg.position.set(this.buttonX, -50);
         this.chipcontainer.addChild(chipbtnbg);
 
         let list = GameState.getInstance().getChipLst();
@@ -155,13 +154,13 @@ export default class MainBoard {
             chipbtn.onClicked(this.handleChangeChipClick.bind(this));
         }
 
-        LayoutHelp.resetPositions(2, new Point(420, -50), 172, chipbtns);
+        LayoutHelp.resetPositions(2, new Point(this.buttonX, -50), 172, chipbtns);
 
         let posi = chipbtns[0].getPosition();
         this.chipslectbasey = posi.y;
         this.chipslect = Sprite.from('chipbg.png');
         this.chipslect.anchor.set(0.5, 0.5);
-        this.chipslect.position.set(420, this.chipslectbasey - 6);
+        this.chipslect.position.set(this.buttonX, this.chipslectbasey - 6);
         this.chipcontainer.addChild(this.chipslect);
 
         this.chipcontainer.visible = false;
@@ -283,16 +282,7 @@ export default class MainBoard {
         txtlabel.run(scalebig);
     }
     update(dt) {
-        this.refreshNextDrawTime(dt);
         RoomMgr.getInstance().update(dt);
-    }
-    refreshNextDrawTime(dt) {
-        this.tempDrawTime += dt;
-        if (this.tempDrawTime > 0.4) {
-            this.tempDrawTime = 0;
-            const time = RoomMgr.getInstance().getResultTime();
-            this.timeTip.refreshTime(time);
-        }
     }
     refreshResultTip(spinresult) {
         this.recttable.showResultItip(spinresult);
@@ -322,7 +312,7 @@ export default class MainBoard {
         if (selectchip != null) {
             let index = selectchip.index;
             let posiy = this.chipslectbasey - 6 + 172 * index;
-            this.chipslect.position.set(420, posiy);
+            this.chipslect.position.set(this.buttonX, posiy);
 
             GameState.getInstance().setSelectChipAmount(number);
             this.refreshBetChip();
@@ -391,7 +381,7 @@ export default class MainBoard {
             return;
         }
         if (name == 'cancelspin') {
-            this.actionCancelSpin();
+
         }
 
     }
@@ -402,25 +392,14 @@ export default class MainBoard {
         GameState.getInstance().refreshWinUi(0);
         RoomMgr.getInstance().spinBtnAction();
     }
-    actionCancelSpin() {
-        RoomMgr.getInstance().cancelSpinBtnAction();
-    }
-    refreshTimeTipColor(isRed) {
-        this.timeTip.setColorRed(isRed);
-    }
     refreshCancelBtnVisiable(active) {
         let operable = RoomMgr.getInstance().isUerOperable();
-        this.btnSpinCancel.setVisiable(active);
         this.btnSpinDo.setVisiable(!active);
 
-        this.btnSpinCancel.setEnabled(active && operable);
         this.btnSpinDo.setEnabled(!active && operable);
     }
     refreshSpinBtnState(active) {
         this.btnSpinDo.setEnabled(active);
-    }
-    refreshSpinCancelBtnState(active) {
-        this.btnSpinCancel.setEnabled(active);
     }
     resetCameraPosi() {
         let moveaction = Action.moveTo(0, 0, 0.2);
@@ -456,8 +435,7 @@ export default class MainBoard {
     }
     canHitBetInBoard() {
         let operable = RoomMgr.getInstance().isUerOperable();
-        let cancelbtn = this.btnSpinCancel.isBtnAble();
-        return this.boradState == MainBoradType.MenuIdle && operable && !cancelbtn;
+        return this.boradState == MainBoradType.MenuIdle && operable;
     }
     handleCircleClick(betinfos) {
         return;
@@ -527,7 +505,6 @@ export default class MainBoard {
             let betinfo = refreshbets[i];
 
             if (betinfo.getIsCircleBet()) {
-                // 环形附带处理了table
                 this.handleCircleClick([betinfo]);
             } else {
                 this.handleBoardClick(betinfo);
@@ -717,7 +694,6 @@ export default class MainBoard {
         this.btnUndoBet.setVisiable(false); // Undo
         this.btnChipChange.setVisiable(false); // Coin image
         this.btnDoubelBet.setVisiable(false); // X2 double
-        this.timeTip.setVisiable(false);
         // Hide the UI border/background
         this.menubtnbg.visible = false; // Menu background border
     }
@@ -730,7 +706,6 @@ export default class MainBoard {
         this.btnUndoBet.setVisiable(true); // Undo
         this.btnChipChange.setVisiable(true); // Coin image
         this.btnDoubelBet.setVisiable(true); // X2 double
-        this.timeTip.setVisiable(true); // Time tip
         // Show the UI border/background
         this.menubtnbg.visible = true; // Menu background border
     }

@@ -11,7 +11,7 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: 'js/[name].[hash].js',
-        publicPath: '../../../',
+        publicPath: './',
     },
     module: {
         rules: [
@@ -116,14 +116,14 @@ module.exports = {
         new CleanWebpackPlugin(),
         new HtmlWebpackPlugin({
             template: './html/index.ejs',
-            filename: 'games/roulettes/1.0.0/index.html',
+            filename: 'index.html',
             chunks: ['game'],
             inject: 'body',
             scriptLoading: 'blocking', // js 加载是否异步  webpack5 特性  {'blocking'|'defer'|'module'}
         }),
         new HtmlWebpackPlugin({
             template: './html/index.ejs',
-            filename: 'games/roulettes/1.0.0/index_.html',
+            filename: 'games/roulettes/1.0.0/index.html',
             chunks: ['game'],
             inject: 'body',
             scriptLoading: 'blocking', // js 加载是否异步  webpack5 特性  {'blocking'|'defer'|'module'}
@@ -136,23 +136,23 @@ module.exports = {
             patterns: [
                 {
                     from: './src/assets2/roulette/*',
-                    to: 'games/assets2/roulette/[name][ext]',
+                    to: 'assets2/roulette/[name][ext]',
                 },
                 {
                     from: './src/assets/music/*',
-                    to: 'games/assets/music/[name][ext]',
+                    to: 'assets/music/[name][ext]',
                 },
                 {
                     from: './src/assets/images/*',
-                    to: 'games/assets/images/[name][ext]',
+                    to: 'assets/images/[name][ext]',
                 },
                 {
                     from: './src/assets/videos/*',
-                    to: 'games/assets/videos/[name][ext]',
+                    to: 'assets/videos/[name][ext]',
                 },
                 {
                     from:'./lang/*',
-                    to:'games/roulettes/lang/[name][ext]'
+                    to:'lang/[name][ext]'
                 }
             ],
         }),

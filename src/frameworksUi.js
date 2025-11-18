@@ -109,7 +109,7 @@ export default class frameworksUi {
         }
         //this.state.servCfg.g_spin(data)
         this.state.servCfg.g_spin(data).then((res) => {
-            this.dispatchEvent.emit('updata-spinEnd', res);
+            this.dispatchEvent.emit('updata-slotmessage', res);
         });
     };
     showCheat() {

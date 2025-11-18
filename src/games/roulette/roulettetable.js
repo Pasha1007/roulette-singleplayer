@@ -96,8 +96,20 @@ export default class RouletteTabel {
         this.historycontainer.position.set(this.renderwitdth * 0.5, this.renderheight * 0.5);
         this.historycontainer.scale.set(scalew, scaleh);
 
-        this.container.position.set(this.renderwitdth * 0.5, this.renderheight * 0.5);
+        // this.container.position.set(this.renderwitdth * 0.5, this.renderheight * 0.5);
+        // var scale = this.renderwitdth / RouletteCfg.DesiWidth;
+        // this.container.scale.set(scale, scale);
+
         var scale = this.renderwitdth / RouletteCfg.DesiWidth;
+
+        // Mobile adjustments: smaller size and moved down
+        let tableY = this.renderheight * 0.4;
+        if (this.renderwitdth <= 768) {
+            scale = scale * 0.8; // 75% of original size on mobile
+            tableY = this.renderheight * 0.5; // Move table down on mobile (55% from top)
+        }
+
+        this.container.position.set(this.renderwitdth * 0.5, tableY);
         this.container.scale.set(scale, scale);
     }
     // load assets

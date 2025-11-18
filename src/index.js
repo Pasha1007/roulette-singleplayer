@@ -1,15 +1,20 @@
 import { stateManager } from './state';
 import { StorageDataGet, urlQuery, fetchGet, isMobile } from './utils';
 import CasinoBridge from './serv.js';
-import EventEmitter from './eventEmitter';
-import formatCurrency from './formatCurrency';
-import frameworksUi from './frameworksUi';
+import EventEmitter from './eventEmitter.js';
+import formatCurrency from './formatCurrency.js';
+import frameworksUi from './frameworksUi.js';
 import './index.less';
 export class SwipeGame {
     constructor() {
         this.changeState({ gameid: urlQuery.gameCode || 'roulette' });
-        this.customServerUrl = `wss://gameserv2.rgstest.slammerstudios.com/`;
+        // Use WebSocket connection on the same port as HTTP server
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        this.customServerUrl = `${protocol}//${window.location.host}`;
         this.dispatchEvent = new EventEmitter();
+        this.gameProgress = 0;
+        this.videoProgress = 0;
+        this.videoReady = false;
         this.resize();
         this.init();
         window.addEventListener('resize', this.resize.bind(this));
@@ -24,6 +29,7 @@ export class SwipeGame {
     init() {
         //game loading
         this.gameloading();
+        this.preloadBackgroundVideo();
         //Load client-side resources
         const gameClient = require(`./games/${this.state.gameid}.js`);
         let game = new gameClient.Roulette({
@@ -45,17 +51,17 @@ export class SwipeGame {
             };
         }
         this.changeState({ settings: settings });
+        if (!urlQuery.configUrl) {
             //Custom-deployed server
             let customTranslationPromise = new Promise((resolve, reject) => {
                 let langurl = '../lang/en-GB.json';
                 fetchGet(langurl).then((common) => {
                     this.changeState({ translation: common });
-                     this.dispatchEvent.emit('updata-translation', { ...this.state.servCfg });
                     resolve();
                 });
             });
             let customServerPromise = new Promise((resolve, reject) => {
-                let serv = new CasinoBridge(`${this.customServerUrl}`, this.state.gameid,this.dispatchEvent);
+                let serv = new CasinoBridge(`${this.customServerUrl}`, this.state.gameid);
                 serv.servLoadOk().then(() => {
                     this.changeState({ servCfg: serv });
                     resolve();
@@ -81,6 +87,7 @@ export class SwipeGame {
                     changeState: this.changeState.bind(this),
                 });
             });
+        }
     }
     visibilityChange() {
         if (document.visibilityState === 'hidden') return;
@@ -166,23 +173,84 @@ export class SwipeGame {
         this.state = stateManager.getState();
     }
     setProgress = (progress) => {
-        let pro = 100 - parseInt(progress) + '%';
+        this.gameProgress = parseInt(progress);
+        const combinedProgress = (this.gameProgress * 0.8) + (this.videoProgress * 0.2);
+        const pro = Math.max(0, 100 - combinedProgress) + '%';
         this.changeState({ progress: pro });
         if (document.getElementById('leo-content2')) {
             document.getElementById('leo-content2').style.clipPath = `inset(0 ${this.state.progress} 0 0)`;
             document.getElementById('leo-content2').style.webkitClipPath = `inset(0 ${this.state.progress} 0 0)`;
-            if (this.state.progress === '0%') {
-                setTimeout(() => {
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('loading').innerHTML = ``;
-                }, 100);
             }
-        }
+        
+        this.checkLoadingComplete();
     };
     openModalDialog = () => {};
     closeModalDialog = () => {};
     getBalance() {
         return this.state.balance;
+    }
+    preloadBackgroundVideo() {
+        const backgroundVideo = document.createElement('video');
+        backgroundVideo.src = 'assets/videos/background.mp4';
+        backgroundVideo.preload = 'auto';
+        backgroundVideo.muted = true;
+        backgroundVideo.loop = true;
+        backgroundVideo.playsInline = true;
+        backgroundVideo.setAttribute('playsinline', 'true');
+        backgroundVideo.setAttribute('webkit-playsinline', 'true');
+        backgroundVideo.style.display = 'none';
+        backgroundVideo.crossOrigin = 'anonymous';
+        window.preloadedBackgroundVideo = backgroundVideo;
+        window.backgroundVideoReadyPromise = new Promise((resolve) => {
+            let resolved = false;
+            const markVideoReady = () => {
+                if (!resolved) {
+                    resolved = true;
+                    this.videoProgress = 100;
+                    this.videoReady = true;
+                    this.checkLoadingComplete();
+                    resolve(true);
+                }
+            };
+            backgroundVideo.addEventListener('canplaythrough', markVideoReady);
+            backgroundVideo.addEventListener('loadeddata', () => {
+                if (backgroundVideo.readyState >= 2) { // HAVE_CURRENT_DATA
+                    markVideoReady();
+                }
+            });
+            setTimeout(() => {
+                if (!resolved) {
+                    resolved = true;
+                    this.videoProgress = 100;
+                    this.videoReady = true; // Mark as ready so loader can hide
+                    this.checkLoadingComplete(); // Check if we can hide loader now
+                    resolve(true); // Allow game to proceed
+                }
+            }, 500); // Quick timeout - don't wait too long for video on mobile
+        });
+        backgroundVideo.addEventListener('error', (e) => {
+            this.videoProgress = 100;
+            this.videoReady = false;
+            this.checkLoadingComplete();
+        });
+        document.body.appendChild(backgroundVideo);
+    }
+    checkLoadingComplete() {
+        if (this.gameProgress >= 100) {
+            setTimeout(() => {
+                const loadingEl = document.getElementById('loading');
+                if (loadingEl && !loadingEl.classList.contains('hiding')) {
+                    loadingEl.classList.add('hiding');
+                    loadingEl.style.opacity = '0';
+                    loadingEl.style.transition = 'opacity 0.3s ease-out';
+                    setTimeout(() => {
+                        if (loadingEl && loadingEl.parentNode) {
+                            loadingEl.remove();
+                        }
+                    }, 300);
+                }
+            }, 0);
+        }
     }
 }
 
