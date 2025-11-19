@@ -24,6 +24,14 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":10,"h":1162},
 	"sourceSize": {"w":10,"h":1162}
 },
+"blue.png":
+{
+	"frame": {"x":1254,"y":1490,"w":149,"h":154},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":149,"h":154},
+	"sourceSize": {"w":149,"h":154}
+},
 "cancel.png":
 {
 	"frame": {"x":1022,"y":1335,"w":153,"h":153},
@@ -88,6 +96,14 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":122,"h":122},
 	"sourceSize": {"w":122,"h":122}
 },
+"green.png":
+{
+	"frame": {"x":1103,"y":1490,"w":149,"h":154},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":149,"h":154},
+	"sourceSize": {"w":149,"h":154}
+},
 "history1.png":
 {
 	"frame": {"x":1351,"y":1646,"w":58,"h":52},
@@ -120,23 +136,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":168,"h":708},
 	"sourceSize": {"w":168,"h":708}
 },
-"rgrayse.png":
-{
-	"frame": {"x":1254,"y":1490,"w":149,"h":154},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":149,"h":154},
-	"sourceSize": {"w":149,"h":154}
-},
-"rgreen.png":
-{
-	"frame": {"x":1103,"y":1490,"w":149,"h":154},
-	"rotated": false,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":149,"h":154},
-	"sourceSize": {"w":149,"h":154}
-},
-"rhongse.png":
+"purple.png":
 {
 	"frame": {"x":952,"y":1528,"w":149,"h":154},
 	"rotated": false,
@@ -144,17 +144,9 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":149,"h":154},
 	"sourceSize": {"w":149,"h":154}
 },
-"rhuangse.png":
+"red.png":
 {
 	"frame": {"x":1177,"y":1339,"w":149,"h":154},
-	"rotated": true,
-	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":149,"h":154},
-	"sourceSize": {"w":149,"h":154}
-},
-"rlanse.png":
-{
-	"frame": {"x":1028,"y":1184,"w":149,"h":154},
 	"rotated": true,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":149,"h":154},
@@ -192,6 +184,14 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":122,"h":122},
 	"sourceSize": {"w":122,"h":122}
 },
+"white.png":
+{
+	"frame": {"x":1028,"y":1184,"w":149,"h":154},
+	"rotated": true,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":149,"h":154},
+	"sourceSize": {"w":149,"h":154}
+},
 "wink0.png":
 {
 	"frame": {"x":712,"y":1796,"w":584,"h":99},
@@ -215,6 +215,6 @@
 	"format": "RGBA8888",
 	"size": {"w":1405,"h":1994},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:ade8b82dffd192bf3be7220a8aa7a55e$"
+	"smartupdate": "$TexturePacker:SmartUpdate:7d8db4b1b7c7f7b8eaebc3ea8e5e7cb0$"
 }
 }

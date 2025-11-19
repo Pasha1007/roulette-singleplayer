@@ -90,7 +90,7 @@ export default class MainBoard {
         this.btnUndoBet = new GameButton('undobet', 'undo.png', lable3, new Point(0, 75), this.menucontainer, undefined, 30);
 
         let money = '0';
-        let texture = 'rgrayse.png';
+        let texture = 'white.png';
         this.btnChipChange = new GameButton('chipbet', texture, money, new Point(0, -6), this.menucontainer, undefined, 42, true);
         this.btnChipChange.setTxtextColor(0x2f2f2f);
 

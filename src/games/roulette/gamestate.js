@@ -33,7 +33,7 @@ export default class GameState {
         this.betList = [];
         this.betvalues = [
             {
-                color: 'rgrayse.png',
+                color: 'white.png',
                 value: 10,
                 index: 0,
             },
@@ -84,15 +84,13 @@ export default class GameState {
         this.gamecfginit = true;
         if (data.status && data.status.gamecfg && data.status.gamecfg.linebets) {
             let linebets = data.status.gamecfg.linebets;
-            let len = Math.min(linebets.length, 5);
-            let colors = ['rgrayse.png', 'rgreen.png', 'rlanse.png', 'rhongse.png', 'rhuangse.png'];
+            let len = linebets.length;
             this.betvalues = [];
             for (let i = 0; i < len; i++) {
-                let bvalue = {};
-                bvalue.color = colors[i];
-                bvalue.value = linebets[i];
-                bvalue.index = i;
-                this.betvalues.push(bvalue);
+                let betcfg=linebets[i];
+                betcfg.color=betcfg.color+'.png';
+                betcfg.index=i;
+                this.betvalues.push(betcfg);
             }
         }
         this.selectChip = this.betvalues[0];

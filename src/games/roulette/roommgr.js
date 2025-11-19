@@ -8,7 +8,7 @@ import { RouletteCfg} from './config';
 
 /**
  * To facilitate further modifications to the project, `roommgr.js` reorganizes the previous project structure and centralizes modifiable logic within itself as much as possible.
- * convaiIntegration maybe should put in roommgr，todo
+ * ConvaiIntegration maybe should put in roommgr，todo
  * Detailed in the README_CLIENT
  */
 
@@ -87,6 +87,8 @@ export default class RoomMgr {
             const spinresult = results[0];
             this.roundResultNumber = spinresult.clientData.curGameModParam.winningNumber;
             this.roundTotalWin = msg.gmi.totalwin;
+            this.wheelEffectStart(this.roundResultNumber);
+            GameState.getInstance().handleResultRecords(this.roundResultNumber);
             GameState.getInstance().collectInfo();
         }
     }

@@ -149,19 +149,16 @@ wss.on('connection', (ws) => {
                 }));
                 
                 // Send game config with chip denominations (like old roulette server)
+                //New**************, Data structure modification
                 ws.send(JSON.stringify({
                     msgid: 'gamecfg',
-                    status: {
-                        gamecfg: {
-                            linebets: [
-                                { value: 10, color: 'white' },      // 10 cents
-                                { value: 25, color: 'red' },        // 25 cents
-                                { value: 50, color: 'blue' },       // 50 cents
-                                { value: 100, color: 'green' },     // $1
-                                { value: 500, color: 'purple' }     // $5
-                            ]
-                        }
-                    }
+                    linebets: [
+                        { value: 10, color: 'white' },      // 10 cents
+                        { value: 25, color: 'red' },        // 25 cents
+                        { value: 50, color: 'blue' },       // 50 cents
+                        { value: 100, color: 'green' },     // $1
+                        { value: 500, color: 'purple' }     // $5
+                    ]
                 }));
                 
                 // Send game module info
@@ -286,10 +283,12 @@ wss.on('connection', (ws) => {
             }
             
             if (data.cmdid === 'collect') {
+                //New**************, The collected message is the server settlement confirmation message, which must include the player's current balance after settlement
                 ws.send(JSON.stringify({
                     msgid: 'collectinfo',
                     playIndex: data.playIndex || 0,
-                    totalwin: 100 // Example win amount
+                    totalwin: 100, // Example win amount
+                    gold: 10100 // Example updated balance
                 }));
                 
                 ws.send(JSON.stringify({
