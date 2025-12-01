@@ -712,18 +712,45 @@ export default class MainBoard {
     // RESTORE TABLE TO ORIGINAL SIZE - Called when video ends
     restoreTableTransforms() {
         if (this.originalTableTransforms) {
-            // Restore tableroot to original scale AND position
-            this.tableroot.scale.set(this.originalTableTransforms.tableroot.scaleX, this.originalTableTransforms.tableroot.scaleY);
-            this.tableroot.position.set(this.originalTableTransforms.tableroot.x, this.originalTableTransforms.tableroot.y);
+            // SMOOTH RESTORATION: Animate back to original size and position
+            const transitionDuration = 0.6; // 600ms smooth restoration
+            
+            // Create smooth scale restoration actions
+            const tableScaleAction = Action.scaleTo(
+                this.originalTableTransforms.tableroot.scaleX, 
+                this.originalTableTransforms.tableroot.scaleY, 
+                transitionDuration
+            );
+            const chipScaleAction = Action.scaleTo(
+                this.originalTableTransforms.chipcontainer.scaleX, 
+                this.originalTableTransforms.chipcontainer.scaleY, 
+                transitionDuration
+            );
+            
+            // Create smooth position restoration actions
+            const tableMoveAction = Action.moveTo(
+                this.originalTableTransforms.tableroot.x, 
+                this.originalTableTransforms.tableroot.y, 
+                transitionDuration
+            );
+            const chipMoveAction = Action.moveTo(
+                this.originalTableTransforms.chipcontainer.x, 
+                this.originalTableTransforms.chipcontainer.y, 
+                transitionDuration
+            );
+            
+            // Combine scale and move actions for simultaneous smooth transition
+            const tableAction = Action.group([tableScaleAction, tableMoveAction]);
+            const chipAction = Action.group([chipScaleAction, chipMoveAction]);
+            
+            // Run both transitions simultaneously
+            this.tableroot.run(tableAction);
+            this.chipcontainer.run(chipAction, () => {
+                // Animation complete - clear saved transforms
+                this.originalTableTransforms = null;
+            });
 
-            // Restore chipcontainer to original scale AND position
-            this.chipcontainer.scale.set(this.originalTableTransforms.chipcontainer.scaleX, this.originalTableTransforms.chipcontainer.scaleY);
-            this.chipcontainer.position.set(this.originalTableTransforms.chipcontainer.x, this.originalTableTransforms.chipcontainer.y);
-
-            // Clear saved transforms for next use
-            this.originalTableTransforms = null;
-
-            // RESTORE UI ELEMENTS after video ends
+            // RESTORE UI ELEMENTS immediately (they fade in during animation)
             this.showVideoModeUIElements();
         }
     }
@@ -762,9 +789,9 @@ export default class MainBoard {
         this.hideVideoModeUIElements();
 
         // Apply scaling temporarily to calculate drift, then smooth transition
-        // Shrink table much more - scale down to 0.5 width and 0.6 height for much smaller size during spin
-        this.tableroot.scale.set(0.5, 0.6);
-        this.chipcontainer.scale.set(0.5, 0.6);
+        // Shrink table moderately - scale down to 0.7 width and 0.75 height for balanced size during video
+        this.tableroot.scale.set(0.7, 0.75);
+        this.chipcontainer.scale.set(0.7, 0.75);
 
         // Convert same local points to global coordinates AFTER scaling
         const tableCenterGlobalAfter = this.tableroot.toGlobal(tableCenterLocal);
@@ -795,9 +822,9 @@ export default class MainBoard {
 
         // Create smooth transition actions (0.5 second duration)
         const transitionDuration = 0.5;
-        // Shrink table much more - scale down to 0.5 width and 0.6 height
-        const tableScaleAction = Action.scaleTo(0.5, 0.6, transitionDuration);
-        const chipScaleAction = Action.scaleTo(0.5, 0.6, transitionDuration);
+        // Shrink table moderately - scale down to 0.7 width and 0.75 height for better visibility
+        const tableScaleAction = Action.scaleTo(0.7, 0.75, transitionDuration);
+        const chipScaleAction = Action.scaleTo(0.7, 0.75, transitionDuration);
         const tableMoveAction = Action.moveTo(tableTargetX, tableTargetY, transitionDuration);
         const chipMoveAction = Action.moveTo(chipTargetX, chipTargetY, transitionDuration);
 

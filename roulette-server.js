@@ -21,7 +21,7 @@ const path = require('path');
 const crypto = require('crypto');
 
 // Configuration
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 const INITIAL_BALANCE = 10000; // $100.00 in cents
 
 // Roulette constants

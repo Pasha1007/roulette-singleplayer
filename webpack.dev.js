@@ -5,12 +5,21 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 
 module.exports = {
+    mode: 'development',
+    devtool: 'eval-source-map', // Fast rebuilds with source maps for debugging
     entry: {
         game: './src/index.js',
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: '[name].[hash].js',
+        filename: 'js/[name].js', // No hash for dev - faster rebuilds
+        clean: true, // Clean dist folder on rebuild
+    },
+    watch: false, // Set to true if running with --watch flag
+    watchOptions: {
+        ignored: /node_modules/,
+        aggregateTimeout: 300, // Delay rebuild after first change (ms)
+        poll: 1000, // Check for changes every second (use if normal watch doesn't work)
     },
     module: {
         rules: [
@@ -82,38 +91,14 @@ module.exports = {
         ],
     },
     optimization: {
-        minimize: true,
-        minimizer: [
-            new TerserPlugin({
-                test: /\.js(\?.*)?$/i, //需要压缩的文件
-                exclude: [/node_modules/, /\/.\/publish\//],
-                parallel: true,
-                extractComments: false, //是否将注释剥离到单独的文件中,默认值： true
-                terserOptions: {
-                    format: {
-                        comments: false,
-                    },
-                    compress: {
-                        //drop_console: true, //移除console
-                        // drop_debug:true,
-                    },
-                },
-            }),
-        ],
-        concatenateModules: true,
-        runtimeChunk: false,
+        minimize: false, // Disable minification for faster dev builds
         splitChunks: {
             chunks: 'all',
-            minSize: 10000,
-            minChunks: 1,
-            maxAsyncRequests: 30,
-            maxInitialRequests: 30,
-            enforceSizeThreshold: 50000,
             cacheGroups: {
-                default: {
-                    minChunks: 2,
-                    priority: -20,
-                    reuseExistingChunk: true,
+                vendor: {
+                    test: /[\\/]node_modules[\\/]/,
+                    name: 'common',
+                    priority: 10,
                 },
             },
         },
@@ -127,7 +112,7 @@ module.exports = {
             scriptLoading: 'blocking', // js 加载是否异步  webpack5 特性  {'blocking'|'defer'|'module'}
         }),
         new MiniCssExtractPlugin({
-            filename: '[name].[hash].css',
+            filename: 'css/[name].css', // No hash for dev - faster rebuilds
             chunkFilename: '[id].css',
         }),
         new CopyPlugin({
@@ -165,7 +150,7 @@ module.exports = {
         },
         historyApiFallback: true,
         allowedHosts: 'all',
-        port: '5000',
+        port: '3000', // Changed from 5000 to 3000
         webSocketServer: false,
         // inline:true,//
         hot: true, // 

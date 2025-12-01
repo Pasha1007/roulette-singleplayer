@@ -6,7 +6,9 @@
     "scripts": {
         "format": "prettier --write .",
         "build": "webpack --mode production --config webpack.build.js",
-        "start": "npm run build && node integrated-server.js",
+        "dev": "webpack --mode development --config webpack.dev.js --watch",
+        "dev:server": "webpack serve --mode development --config webpack.dev.js",
+        "start": "npm run build && PORT=3000 node integrated-server.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "pawn",

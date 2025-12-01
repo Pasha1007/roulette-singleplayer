@@ -15,10 +15,11 @@ export default class VideoWheel {
         this.videoContainer.zIndex = -100; // Very low priority to ensure background appears behind everything
         this.root.addChild(this.videoContainer); // Add to root, NOT wheel container!
 
-        // Initialize videos asynchronously and show background video when ready
+        // Initialize videos asynchronously
+        // Background video hidden to show solid color background instead
         this.videoManager.initializeVideos().then(() => {
-            // Show background video when ready
-            this.videoManager.showBackgroundVideo();
+            // Background video disabled - using solid color background
+            // this.videoManager.showBackgroundVideo();
         });
     }
     /**

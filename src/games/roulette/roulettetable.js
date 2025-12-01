@@ -1,4 +1,4 @@
-import { Assets, Sprite, Container } from 'pixi.js';
+import { Assets, Sprite, Container, Graphics } from 'pixi.js';
 import { Action, registerPixiJSActionsMixin } from 'pixijs-actions';
 import { RouletteCfg } from './config';
 import GameState from './gamestate';
@@ -42,6 +42,22 @@ export default class RouletteTabel {
     }
     initComponents() {
         var stage = this.m_app.stage;
+        
+        // Enable z-index sorting on stage
+        stage.sortableChildren = true;
+        
+        // Add green background rectangle first - directly to stage to ensure it's behind everything
+        const greenBackground = new Graphics();
+        greenBackground.beginFill(0x0E3D27); // Dark green casino color
+        greenBackground.drawRect(0, 0, this.m_app.screen.width * 2, this.m_app.screen.height * 2);
+        greenBackground.endFill();
+        greenBackground.position.set(-this.m_app.screen.width / 2, -this.m_app.screen.height / 2);
+        greenBackground.zIndex = -999; // Ensure it's behind everything
+        greenBackground.eventMode = 'none'; // Disable pointer events so it doesn't block clicks
+        greenBackground.interactive = false; // Make sure it's not interactive
+        stage.addChild(greenBackground);
+        this.greenBackground = greenBackground;
+        
         this.bgcontainer = new Container();
         stage.addChild(this.bgcontainer);
 
@@ -56,16 +72,14 @@ export default class RouletteTabel {
         this.resizeTable(true);
     }
     initBackground() {
-        let designwidth = RouletteCfg.DesiWidth;
-        let designheight = RouletteCfg.DesiHeight;
-
-        let nineSlicePlaneCenter = Sprite.from('bgcenter.jpg');
-        nineSlicePlaneCenter.anchor.set(0.5, 0.5);
-        nineSlicePlaneCenter.position.set(0, 0);
-        let scalew0 = designwidth / 540 + 0.2;
-        let scaleh0 = designheight / 960 + 0.2;
-        nineSlicePlaneCenter.scale.set(scalew0, scaleh0);
-        this.bgcontainer.addChild(nineSlicePlaneCenter);
+        // Additional background in container for scaling
+        const background = new Graphics();
+        background.beginFill(0x0E3D27); // Dark green casino color
+        background.drawRect(-5000, -5000, 10000, 10000);
+        background.endFill();
+        background.eventMode = 'none'; // Disable pointer events
+        background.interactive = false; // Make sure it's not interactive
+        this.bgcontainer.addChild(background);
     }
     initTable() {
         this.mainboard = new MainBoard();
@@ -89,6 +103,15 @@ export default class RouletteTabel {
         this.renderheight = this.m_app.screen.height;
         let scalew = this.renderwitdth / RouletteCfg.DesiWidth;
         let scaleh = this.renderheight / RouletteCfg.DesiHeight;
+
+        // Update green background to cover entire screen
+        if (this.greenBackground) {
+            this.greenBackground.clear();
+            this.greenBackground.beginFill(0x0E3D27);
+            this.greenBackground.drawRect(0, 0, this.renderwitdth * 3, this.renderheight * 3);
+            this.greenBackground.endFill();
+            this.greenBackground.position.set(-this.renderwitdth, -this.renderheight);
+        }
 
         this.bgcontainer.position.set(this.renderwitdth * 0.5, this.renderheight * 0.5);
         this.bgcontainer.scale.set(scalew, scaleh);
