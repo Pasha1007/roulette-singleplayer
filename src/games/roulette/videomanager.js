@@ -174,31 +174,13 @@ class VideoManager {
         // Center horizontally
         sprite.x = 0;
         
-        // Fixed vertical positioning based on screen size
-        if (screenWidth >= 1024) {
-            sprite.y = -700; // Desktop
-        } else if (screenWidth >= 768) {
-            sprite.y = -580; // Tablet
-        } else {
-            sprite.y = -480; // Mobile
-        }
+        // CONSISTENT positioning and sizing across ALL devices
+        // Use desktop settings for all screen sizes to ensure consistency
+        sprite.y = -700;
 
-        // FIXED VIDEO DIMENSIONS - Same for all videos
-        let fixedWidth, fixedHeight;
-
-        if (screenWidth >= 1024) {
-            // Desktop: Fixed size
-            fixedWidth = 1400;
-            fixedHeight = 800;
-        } else if (screenWidth >= 768) {
-            // Tablet: Fixed size
-            fixedWidth = 1000;
-            fixedHeight = 600;
-        } else {
-            // Mobile: Fixed size
-            fixedWidth = 600;
-            fixedHeight = 500;
-        }
+        // FIXED VIDEO DIMENSIONS - Same for ALL devices (desktop size)
+        const fixedWidth = 1400;
+        const fixedHeight = 800;
 
         // Calculate scale to achieve fixed dimensions
         const scaleX = fixedWidth / video.videoWidth;
@@ -207,7 +189,7 @@ class VideoManager {
         // Use uniform scale (average) to maintain aspect ratio
         const scale = (scaleX + scaleY) / 2;
 
-        // Set the same scale for all videos - no parent compensation needed
+        // Set the same scale for all videos - consistent across all devices
         sprite.scale.set(scale, scale);
     }
 
