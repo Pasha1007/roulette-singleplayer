@@ -789,7 +789,7 @@ export default class MainBoard {
         this.hideVideoModeUIElements();
 
         // Apply scaling temporarily to calculate drift, then smooth transition
-        // Shrink table moderately - scale down to 0.7 width and 0.75 height for balanced size during video
+        // Scale down to 0.7 width and 0.75 height for video mode
         this.tableroot.scale.set(0.7, 0.75);
         this.chipcontainer.scale.set(0.7, 0.75);
 
@@ -822,7 +822,7 @@ export default class MainBoard {
 
         // Create smooth transition actions (0.5 second duration)
         const transitionDuration = 0.5;
-        // Shrink table moderately - scale down to 0.7 width and 0.75 height for better visibility
+        // Scale down to 0.7 width and 0.75 height for video mode
         const tableScaleAction = Action.scaleTo(0.7, 0.75, transitionDuration);
         const chipScaleAction = Action.scaleTo(0.7, 0.75, transitionDuration);
         const tableMoveAction = Action.moveTo(tableTargetX, tableTargetY, transitionDuration);

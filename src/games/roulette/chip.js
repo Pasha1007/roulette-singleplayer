@@ -19,13 +19,13 @@ export default class Chip {
         this.root.addChild(this.chipcontainer);
         let sprite = Sprite.from(textureName);
         sprite.anchor.set(0.5, 0.5);
-        sprite.scale.set(0.5, 0.5); // Original chip size
+        sprite.scale.set(0.5, 0.5); // Original size - will be scaled by tableroot's 1.2x
         this.chipcontainer.addChild(sprite);
 
         let amount = this.chipamount;
         let money = GameState.getInstance().formatChipMoney(amount);
-        let amounttxt = Util.createrTxt(money, 22, '0x2f2f2f', false); // Original dark text
-        amounttxt.position.set(0, -3); // Original text position
+        let amounttxt = Util.createrTxt(money, 22, '0x2f2f2f', false); // Original size - will be scaled by tableroot's 1.2x
+        amounttxt.position.set(0, -3);
         this.chipcontainer.addChild(amounttxt);
     }
     randomMove() {
