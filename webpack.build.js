@@ -17,6 +17,9 @@ module.exports = {
         filename: 'js/[name].[contenthash].js',
         publicPath: './',
     },
+    // Reduce memory usage during build
+    cache: false,
+    parallelism: 1,
     module: {
         rules: [
             {
@@ -79,7 +82,7 @@ module.exports = {
             new TerserPlugin({
                 test: /\.js(\?.*)?$/i, //需要压缩的文件
                 exclude: [/node_modules/, /\/.\/publish\//],
-                parallel: true,
+                parallel: 1, // Limit to 1 worker to reduce memory usage on Railway
                 extractComments: false, //是否将注释剥离到单独的文件中,默认值： true
                 terserOptions: {
                     format: {
