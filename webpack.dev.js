@@ -4,6 +4,9 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 
+// Change VIDEO_THEME to 'default' or 'christmas_edition' to switch video folders
+const VIDEO_THEME = 'christmas_edition';
+
 module.exports = {
     mode: 'development',
     devtool: 'eval-source-map', // Fast rebuilds with source maps for debugging
@@ -130,8 +133,8 @@ module.exports = {
                     to: 'assets/images/[name][ext]',
                 },
                 {
-                    from: './src/assets/videos/*',
-                    to: 'assets/videos/[name][ext]',
+                    from: `./src/assets/videos/${VIDEO_THEME}/*`,
+                    to: `assets/videos/${VIDEO_THEME}/[name][ext]`,
                 },
                 {
                     from: './lang/*',
@@ -153,7 +156,7 @@ module.exports = {
         port: '3000', // Changed from 5000 to 3000
         webSocketServer: false,
         // inline:true,//
-        hot: true, // 
+        hot: true, //
         host: '0.0.0.0',
         compress: true, // gzip
     },

@@ -30,11 +30,12 @@ class VideoManager {
         // Automatically map all 37 roulette numbers (0-36) to their video files
         this.videoMapping = {};
         for (let i = 0; i <= 36; i++) {
-            this.videoMapping[i] = `assets/videos/number_${i}.mp4`;
+            this.videoMapping[i] = `assets/videos/christmas_edition/number_${i}.mp4`;
         }
 
         // Background video path - Using local video for better performance
-        this.backgroundVideoPath = 'assets/videos/background.mp4';
+        // Note: Christmas edition has a typo in the filename: 'backgroud.mp4' instead of 'background.mp4'
+        this.backgroundVideoPath = 'assets/videos/christmas_edition/backgroud.mp4';
     }
 
     /**
@@ -45,7 +46,7 @@ class VideoManager {
         try {
             // Initialize background video using same approach as result videos
             await this.initializeBackgroundVideo();
-            
+
             // Skip eager preloading - videos will load on-demand when needed
             // This allows the game to start quickly without waiting for all 37 videos
             console.log('[VideoManager] Videos ready for on-demand loading');
@@ -98,7 +99,7 @@ class VideoManager {
                         // Add dark overlay on background video
                         this.backgroundOverlayDark = new Graphics();
                         this.backgroundOverlayDark.beginFill(0x000000, 0.5); // 50% black overlay
-                        
+
                         // Match the video sprite dimensions and position
                         const videoWidth = backgroundVideo.videoWidth * this.backgroundSprite.scale.x;
                         const videoHeight = backgroundVideo.videoHeight * this.backgroundSprite.scale.y;
@@ -112,18 +113,12 @@ class VideoManager {
                         this.backgroundOverlayDark.zIndex = 2;
                         this.backgroundOverlayDark.visible = true;
                         this.backgroundOverlayDark.alpha = 1;
-                        
+
                         this.container.addChild(this.backgroundOverlayDark);
 
                         // ADD SHADOW UNDER BACKGROUND VIDEO
                         this.backgroundShadow = new Graphics();
-                        this.drawVideoShadow(
-                            this.backgroundShadow,
-                            this.backgroundSprite.x,
-                            this.backgroundSprite.y,
-                            videoWidth,
-                            videoHeight
-                        );
+                        this.drawVideoShadow(this.backgroundShadow, this.backgroundSprite.x, this.backgroundSprite.y, videoWidth, videoHeight);
                         this.backgroundShadow.zIndex = 3;
                         this.backgroundShadow.visible = true;
                         this.backgroundShadow.alpha = 1;
@@ -155,7 +150,6 @@ class VideoManager {
                         resolve(false);
                     }
                 }, 2000);
-
             } catch (error) {
                 console.log('[VideoManager] Background video initialization error:', error);
                 resolve(false);
@@ -173,7 +167,7 @@ class VideoManager {
 
         // Center horizontally
         sprite.x = 0;
-        
+
         // CONSISTENT positioning and sizing across ALL devices
         // Use desktop settings for all screen sizes to ensure consistency
         sprite.y = -700;
@@ -185,7 +179,7 @@ class VideoManager {
         // Calculate scale to achieve fixed dimensions
         const scaleX = fixedWidth / video.videoWidth;
         const scaleY = fixedHeight / video.videoHeight;
-        
+
         // Use uniform scale (average) to maintain aspect ratio
         const scale = (scaleX + scaleY) / 2;
 
@@ -199,7 +193,7 @@ class VideoManager {
      */
     drawVideoShadow(shadowGraphics, videoX, videoY, videoWidth, videoHeight) {
         shadowGraphics.clear();
-        
+
         const shadowHeight = 25; // Smaller, more subtle shadow
         const borderX = videoX - videoWidth / 2;
         const borderY = videoY + videoHeight / 2;
@@ -359,14 +353,8 @@ class VideoManager {
         const scaledVideoHeight = video.videoHeight * actualScale;
 
         // Draw shadow using shared method
-        this.drawVideoShadow(
-            this.bottomBorder,
-            this.videoSprite.x,
-            this.videoSprite.y,
-            scaledVideoWidth,
-            scaledVideoHeight
-        );
-        
+        this.drawVideoShadow(this.bottomBorder, this.videoSprite.x, this.videoSprite.y, scaledVideoWidth, scaledVideoHeight);
+
         this.bottomBorder.zIndex = 1001; // Above video
         this.bottomBorder.alpha = 1;
         this.bottomBorder.visible = true;
@@ -376,7 +364,7 @@ class VideoManager {
             this.resultVideoOverlay = new Graphics();
             this.container.addChild(this.resultVideoOverlay);
         }
-        
+
         // Draw dark overlay matching video size
         this.resultVideoOverlay.clear();
         this.resultVideoOverlay.beginFill(0x000000, 0.5); // Same darkness as idle video overlay
@@ -402,17 +390,17 @@ class VideoManager {
         // SMOOTH FADE OUT of dark overlay only (for darkening effect)
         const startTime = Date.now();
         const duration = 400; // 400ms smooth overlay fade
-        
+
         const fadeOutOverlay = () => {
             const elapsed = Date.now() - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            
+
             // Ease-out for smooth deceleration
             const easeProgress = 1 - Math.pow(1 - progress, 2);
-            
+
             // Only fade out dark overlay (video stays fully visible)
             this.resultVideoOverlay.alpha = 1 - easeProgress;
-            
+
             if (progress < 1) {
                 requestAnimationFrame(fadeOutOverlay);
             } else {
@@ -421,7 +409,7 @@ class VideoManager {
                 this.resultVideoOverlay.alpha = 0;
             }
         };
-        
+
         fadeOutOverlay();
 
         // Debug: Check container hierarchy after sprites are created
@@ -484,22 +472,22 @@ class VideoManager {
             this.videoSprite.visible = false;
             this.videoSprite.alpha = 0;
         }
-        
+
         if (this.bottomBorder) {
             this.bottomBorder.visible = false;
             this.bottomBorder.alpha = 0;
         }
-        
+
         if (this.resultVideoOverlay) {
             this.resultVideoOverlay.visible = false;
             this.resultVideoOverlay.alpha = 0;
         }
-        
+
         // IMMEDIATE CALLBACK: Table restores instantly - ZERO DELAY
         if (this.onVideoComplete) {
             this.onVideoComplete();
         }
-        
+
         // INSTANT BACKGROUND SHOW: Background appears immediately
         // Only the darkening overlay will fade smoothly
         this.showBackgroundVideoInstant();
@@ -519,7 +507,7 @@ class VideoManager {
                 this.bottomBorder.alpha = 1;
                 this.bottomBorder.visible = true;
             }
-            
+
             // No animation - instant display for zero perceived delay
         }
     }
@@ -590,27 +578,27 @@ class VideoManager {
             const startTime = Date.now();
             const duration = 600; // 600ms smooth fade-out
             const startAlpha = this.videoSprite.alpha;
-            
+
             const fadeOutTween = () => {
                 const elapsed = Date.now() - startTime;
                 const progress = Math.min(elapsed / duration, 1);
-                
+
                 // Ease-in for smooth acceleration into fade
                 const easeProgress = progress * progress;
-                
+
                 const newAlpha = startAlpha * (1 - easeProgress);
                 this.videoSprite.alpha = newAlpha;
-                
+
                 // Fade out shadow with same timing
                 if (this.bottomBorder) {
                     this.bottomBorder.alpha = newAlpha;
                 }
-                
+
                 // Fade out result overlay if visible
                 if (this.resultVideoOverlay && this.resultVideoOverlay.visible) {
                     this.resultVideoOverlay.alpha = newAlpha;
                 }
-                
+
                 if (progress < 1) {
                     requestAnimationFrame(fadeOutTween);
                 } else {
@@ -702,12 +690,12 @@ class VideoManager {
             // Smooth fade out animation for both video and shadow
             const fadeOut = () => {
                 this.backgroundSprite.alpha = Math.max(0, this.backgroundSprite.alpha - 0.15);
-                
+
                 // Fade out shadow with same timing
                 if (this.backgroundShadow) {
                     this.backgroundShadow.alpha = this.backgroundSprite.alpha;
                 }
-                
+
                 if (this.backgroundSprite.alpha > 0) {
                     requestAnimationFrame(fadeOut);
                 } else {
@@ -739,7 +727,7 @@ class VideoManager {
             // INSTANT SHOW: Video appears immediately
             this.backgroundSprite.visible = true;
             this.backgroundSprite.alpha = 1;
-            
+
             if (this.backgroundShadow) {
                 this.backgroundShadow.visible = true;
                 this.backgroundShadow.alpha = 1;
@@ -767,26 +755,26 @@ class VideoManager {
             if (this.backgroundOverlayDark) {
                 this.backgroundOverlayDark.visible = true;
                 this.backgroundOverlayDark.alpha = 0; // Start invisible
-                
+
                 const startTime = Date.now();
                 const duration = 400; // 400ms smooth overlay fade
-                
+
                 const fadeInOverlay = () => {
                     const elapsed = Date.now() - startTime;
                     const progress = Math.min(elapsed / duration, 1);
-                    
+
                     // Ease-out for smooth deceleration
                     const easeProgress = 1 - Math.pow(1 - progress, 2);
-                    
+
                     this.backgroundOverlayDark.alpha = easeProgress;
-                    
+
                     if (progress < 1) {
                         requestAnimationFrame(fadeInOverlay);
                     } else {
                         this.backgroundOverlayDark.alpha = 1;
                     }
                 };
-                
+
                 fadeInOverlay();
             }
         } catch (error) {}
@@ -804,27 +792,25 @@ class VideoManager {
         const startTime = Date.now();
         const duration = 300; // Quick fade
         const startAlpha = this.backgroundSprite.alpha;
-        
+
         const smoothFade = () => {
             const elapsed = Date.now() - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            
+
             // Ease-in-out for smooth acceleration and deceleration
-            const easeProgress = progress < 0.5 
-                ? 2 * progress * progress 
-                : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-            
+            const easeProgress = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+
             const newAlpha = startAlpha * (1 - easeProgress);
             this.backgroundSprite.alpha = newAlpha;
-            
+
             if (this.backgroundShadow) {
                 this.backgroundShadow.alpha = newAlpha;
             }
-            
+
             if (this.backgroundOverlayDark) {
                 this.backgroundOverlayDark.alpha = newAlpha;
             }
-            
+
             if (progress < 1) {
                 requestAnimationFrame(smoothFade);
             } else {
@@ -842,7 +828,7 @@ class VideoManager {
                 }
             }
         };
-        
+
         smoothFade();
     }
 
@@ -857,17 +843,17 @@ class VideoManager {
         // INSTANT: Hide immediately without animation
         this.backgroundSprite.alpha = 0;
         this.backgroundSprite.visible = false;
-        
+
         if (this.backgroundShadow) {
             this.backgroundShadow.alpha = 0;
             this.backgroundShadow.visible = false;
         }
-        
+
         if (this.backgroundOverlayDark) {
             this.backgroundOverlayDark.alpha = 0;
             this.backgroundOverlayDark.visible = false;
         }
-        
+
         if (this.backgroundVideo && this.isBackgroundPlaying) {
             this.backgroundVideo.pause();
             this.isBackgroundPlaying = false;

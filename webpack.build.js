@@ -4,6 +4,10 @@ const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
+
+// Change VIDEO_THEME to 'default' or 'christmas_edition' to switch video folders
+const VIDEO_THEME = 'christmas_edition';
+
 module.exports = {
     entry: {
         game: './src/index.js',
@@ -147,13 +151,13 @@ module.exports = {
                     to: 'assets/images/[name][ext]',
                 },
                 {
-                    from: './src/assets/videos/*',
-                    to: 'assets/videos/[name][ext]',
+                    from: `./src/assets/videos/${VIDEO_THEME}/*`,
+                    to: `assets/videos/${VIDEO_THEME}/[name][ext]`,
                 },
                 {
-                    from:'./lang/*',
-                    to:'lang/[name][ext]'
-                }
+                    from: './lang/*',
+                    to: 'lang/[name][ext]',
+                },
             ],
         }),
     ],

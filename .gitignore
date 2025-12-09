@@ -3,7 +3,7 @@ publish
 package-lock.json
 
 .idea/workspace.xml
-
+.DS_Store
 .cache/
 dist
 .npm

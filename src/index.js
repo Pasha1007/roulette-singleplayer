@@ -174,14 +174,14 @@ export class SwipeGame {
     }
     setProgress = (progress) => {
         this.gameProgress = parseInt(progress);
-        const combinedProgress = (this.gameProgress * 0.8) + (this.videoProgress * 0.2);
+        const combinedProgress = this.gameProgress * 0.8 + this.videoProgress * 0.2;
         const pro = Math.max(0, 100 - combinedProgress) + '%';
         this.changeState({ progress: pro });
         if (document.getElementById('leo-content2')) {
             document.getElementById('leo-content2').style.clipPath = `inset(0 ${this.state.progress} 0 0)`;
             document.getElementById('leo-content2').style.webkitClipPath = `inset(0 ${this.state.progress} 0 0)`;
-            }
-        
+        }
+
         this.checkLoadingComplete();
     };
     openModalDialog = () => {};
@@ -191,7 +191,7 @@ export class SwipeGame {
     }
     preloadBackgroundVideo() {
         const backgroundVideo = document.createElement('video');
-        backgroundVideo.src = 'assets/videos/background.mp4';
+        backgroundVideo.src = 'assets/videos/christmas_edition/backgroud.mp4';
         backgroundVideo.preload = 'auto';
         backgroundVideo.muted = true;
         backgroundVideo.loop = true;
@@ -214,7 +214,8 @@ export class SwipeGame {
             };
             backgroundVideo.addEventListener('canplaythrough', markVideoReady);
             backgroundVideo.addEventListener('loadeddata', () => {
-                if (backgroundVideo.readyState >= 2) { // HAVE_CURRENT_DATA
+                if (backgroundVideo.readyState >= 2) {
+                    // HAVE_CURRENT_DATA
                     markVideoReady();
                 }
             });
