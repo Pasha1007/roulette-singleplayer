@@ -20,6 +20,10 @@ module.exports = {
     // Reduce memory usage during build
     cache: false,
     parallelism: 1,
+    // Disable performance hints to reduce memory usage
+    performance: {
+        hints: false,
+    },
     module: {
         rules: [
             {
@@ -82,7 +86,7 @@ module.exports = {
             new TerserPlugin({
                 test: /\.js(\?.*)?$/i, //需要压缩的文件
                 exclude: [/node_modules/, /\/.\/publish\//],
-                parallel: 1, // Limit to 1 worker to reduce memory usage on Railway
+                parallel: false, // Disable parallel processing completely
                 extractComments: false, //是否将注释剥离到单独的文件中,默认值： true
                 terserOptions: {
                     format: {
@@ -95,27 +99,21 @@ module.exports = {
                 },
             }),
         ],
-        concatenateModules: true,
+        concatenateModules: false, // Disable to save memory
         runtimeChunk: false,
         splitChunks: {
             chunks: 'all',
-            minSize: 10000,
+            minSize: 20000,
             minChunks: 1,
-            maxAsyncRequests: 30,
-            maxInitialRequests: 30,
-            enforceSizeThreshold: 50000,
+            maxAsyncRequests: 5, // Reduce chunk splitting
+            maxInitialRequests: 5, // Reduce chunk splitting
             cacheGroups: {
                 vendor: {
                     test: /[\\/]node_modules[\\/]/, // 匹配 node_modules 中的模块
                     name: 'common', // 提取后的公共模块文件名
                     enforce: true, // 强制提取
+                    priority: 10,
                 },
-                /*common: {
-                    minChunks:2, // 至少被两个 chunk 引用才提取
-                    name: 'common', // 提取后的公共模块文件名
-                    priority: 10, // 提取优先级
-                    reuseExistingChunk: true, // 如果该模块已经被提取过，则直接复用
-                },*/
             },
         },
     },
@@ -156,12 +154,16 @@ module.exports = {
                 {
                     from: `./src/assets/videos/${VIDEO_THEME}/*`,
                     to: `assets/videos/${VIDEO_THEME}/[name][ext]`,
+                    noErrorOnMissing: true,
                 },
                 {
                     from: './lang/*',
                     to: 'lang/[name][ext]',
                 },
             ],
+            options: {
+                concurrency: 1, // Copy files one at a time to reduce memory
+            },
         }),
     ],
 };
