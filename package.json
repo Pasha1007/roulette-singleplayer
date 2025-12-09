@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "format": "prettier --write .",
-        "build": "NODE_OPTIONS=--max-old-space-size=1024 webpack --mode production --config webpack.build.js",
+        "build": "webpack --mode production --config webpack.build.js",
         "dev": "webpack --mode development --config webpack.dev.js --watch",
         "dev:server": "webpack serve --mode development --config webpack.dev.js",
         "start": "npm run build && PORT=3000 node integrated-server.js",
