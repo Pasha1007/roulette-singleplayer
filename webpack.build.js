@@ -14,7 +14,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: 'js/[name].[hash].js',
+        filename: 'js/[name].[contenthash].js',
         publicPath: './',
     },
     module: {
@@ -30,7 +30,7 @@ module.exports = {
                     // 8kb一下
                     limit: 8 * 1024,
                     esModule: false,
-                    name: 'img/[hash:9].[ext]',
+                    name: 'img/[contenthash:9].[ext]',
                 },
                 type: 'javascript/auto',
             },
@@ -133,7 +133,7 @@ module.exports = {
             scriptLoading: 'blocking', // js 加载是否异步  webpack5 特性  {'blocking'|'defer'|'module'}
         }),
         new MiniCssExtractPlugin({
-            filename: './css/[name].[hash].css',
+            filename: './css/[name].[contenthash].css',
             chunkFilename: './css/[id].css',
         }),
         new CopyPlugin({
