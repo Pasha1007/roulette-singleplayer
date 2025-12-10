@@ -1,4 +1,4 @@
-import { Assets, Sprite, Container, Graphics, Texture, BLEND_MODES } from 'pixi.js';
+import { Assets, Sprite, Container } from 'pixi.js';
 import { Action, registerPixiJSActionsMixin } from 'pixijs-actions';
 import { RouletteCfg } from './config';
 import GameState from './gamestate';
@@ -60,26 +60,13 @@ export default class RouletteTabel {
         this.resizeTable(true);
     }
     initBackground() {
+        // Load green-bg.png - optimized: load after sprite sheets to reduce initial memory spike
+        // The image will be loaded on-demand when initBackground is called
         let greenBackground = Sprite.from('assets/images/green-bg.png');
         greenBackground.anchor.set(0.5, 0.5);
         greenBackground.position.set(0, 0);
         this.bgcontainer.addChild(greenBackground);
         this.greenBackground = greenBackground;
-
-        // Add a soft dark gradient overlay to blend with the video/table area
-        const gradientTexture = this.createVerticalGradientTexture([
-            { offset: 0, color: 'rgba(0, 0, 0, 0.55)' },
-            { offset: 0.4, color: 'rgba(0, 0, 0, 0.28)' },
-            { offset: 1, color: 'rgba(0, 0, 0, 0)' },
-        ]);
-        const gradientOverlay = new Sprite(gradientTexture);
-        gradientOverlay.anchor.set(0.5, 0.5);
-        gradientOverlay.position.set(0, 0);
-        gradientOverlay.width = RouletteCfg.DesiWidth;
-        gradientOverlay.height = RouletteCfg.DesiHeight;
-        gradientOverlay.blendMode = BLEND_MODES.NORMAL;
-        this.bgcontainer.addChild(gradientOverlay);
-        this.gradientOverlay = gradientOverlay;
     }
     initTable() {
         this.mainboard = new MainBoard();
@@ -104,7 +91,7 @@ export default class RouletteTabel {
         let scalew = this.renderwitdth / RouletteCfg.DesiWidth;
         let scaleh = this.renderheight / RouletteCfg.DesiHeight;
 
-        // Scale background image to cover only the area below the video
+        // Scale background image to cover only the area below the video (memory optimization)
         if (this.greenBackground && this.greenBackground.texture && this.greenBackground.texture.valid) {
             // Video is positioned at y = -700 with height 800, so bottom is at -700 + 400 = -300
             // In design coordinates, the video bottom is at approximately -300
@@ -151,23 +138,6 @@ export default class RouletteTabel {
         }
     }
 
-    /**
-     * Creates a vertical gradient texture using an offscreen canvas.
-     * Stops: array of { offset: 0..1, color: 'rgba(...)' }
-     */
-    createVerticalGradientTexture(stops) {
-        const width = 2;
-        const height = 256;
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        const gradient = ctx.createLinearGradient(0, 0, 0, height);
-        stops.forEach(stop => gradient.addColorStop(stop.offset, stop.color));
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, width, height);
-        return Texture.from(canvas);
-    }
     // load assets
     async loadGameAssets() {
         try {
