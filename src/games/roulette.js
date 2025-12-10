@@ -10,7 +10,7 @@ class Roulette {
     }
     async InitGame() {
         const app = new Application({
-            backgroundColor: 0x0E3D27, // Premium dark green casino background
+            backgroundColor: 0x000000, // Black background - will be covered by green-bg.png image
             width: document.getElementById('game-container').offsetWidth,
             height: document.getElementById('game-container').offsetHeight,
             autoDensity: true,

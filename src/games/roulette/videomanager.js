@@ -1,4 +1,4 @@
-import { Container, Sprite, Texture, BaseTexture, Graphics } from 'pixi.js';
+import { Container, Sprite, Texture, BaseTexture, Graphics, BlurFilter } from 'pixi.js';
 import Util from './Util';
 
 class VideoManager {
@@ -14,6 +14,7 @@ class VideoManager {
         this.backgroundOverlay = null;
         this.currentVideo = null;
         this.bottomBorder = null;
+        this.resultVideoInnerShadow = null;
         this.videoTextures = new Map();
         this.isPlaying = false;
         this.onVideoComplete = null;
@@ -96,13 +97,29 @@ class VideoManager {
                         // Add to container
                         this.container.addChild(this.backgroundSprite);
 
-                        // Add dark overlay on background video
-                        this.backgroundOverlayDark = new Graphics();
-                        this.backgroundOverlayDark.beginFill(0x000000, 0.5); // 50% black overlay
-
                         // Match the video sprite dimensions and position
                         const videoWidth = backgroundVideo.videoWidth * this.backgroundSprite.scale.x;
                         const videoHeight = backgroundVideo.videoHeight * this.backgroundSprite.scale.y;
+
+                        // Add blurred rectangle at bottom border to hide transition
+                        this.backgroundBlurBorder = new Graphics();
+                        this.drawBlurBorder(this.backgroundBlurBorder, this.backgroundSprite.x, this.backgroundSprite.y, videoWidth, videoHeight);
+                        this.backgroundBlurBorder.zIndex = 2; // Above video sprite
+                        this.backgroundBlurBorder.visible = true;
+                        this.backgroundBlurBorder.alpha = 1;
+                        this.container.addChild(this.backgroundBlurBorder);
+
+                        // Add inner shadow at bottom of video (creates background flowing into video effect)
+                        this.backgroundInnerShadow = new Graphics();
+                        this.drawInnerShadow(this.backgroundInnerShadow, this.backgroundSprite.x, this.backgroundSprite.y, videoWidth, videoHeight);
+                        this.backgroundInnerShadow.zIndex = 3; // Above blur border
+                        this.backgroundInnerShadow.visible = true;
+                        this.backgroundInnerShadow.alpha = 1;
+                        this.container.addChild(this.backgroundInnerShadow);
+
+                        // Add dark overlay on background video
+                        this.backgroundOverlayDark = new Graphics();
+                        this.backgroundOverlayDark.beginFill(0x000000, 0.5); // 50% black overlay
                         this.backgroundOverlayDark.drawRect(
                             this.backgroundSprite.x - videoWidth / 2,
                             this.backgroundSprite.y - videoHeight / 2,
@@ -110,7 +127,7 @@ class VideoManager {
                             videoHeight
                         );
                         this.backgroundOverlayDark.endFill();
-                        this.backgroundOverlayDark.zIndex = 2;
+                        this.backgroundOverlayDark.zIndex = 4; // Above inner shadow
                         this.backgroundOverlayDark.visible = true;
                         this.backgroundOverlayDark.alpha = 1;
 
@@ -119,7 +136,7 @@ class VideoManager {
                         // ADD SHADOW UNDER BACKGROUND VIDEO
                         this.backgroundShadow = new Graphics();
                         this.drawVideoShadow(this.backgroundShadow, this.backgroundSprite.x, this.backgroundSprite.y, videoWidth, videoHeight);
-                        this.backgroundShadow.zIndex = 3;
+                        this.backgroundShadow.zIndex = 4; // Above overlay
                         this.backgroundShadow.visible = true;
                         this.backgroundShadow.alpha = 1;
                         this.container.addChild(this.backgroundShadow);
@@ -188,56 +205,146 @@ class VideoManager {
     }
 
     /**
+     * Draw blurred rectangle at bottom border to hide transition
+     * Uses full game field width and matches background color
+     */
+    drawBlurBorder(blurGraphics, videoX, videoY, videoWidth, videoHeight) {
+        blurGraphics.clear();
+
+        // Get full game field width (screen width or design width)
+        const screenWidth = window.innerWidth || 1080;
+        const borderY = videoY + videoHeight / 2; // Bottom edge of video
+        const blurHeight = 90; // Height of blur area (extends both into video and background)
+        
+        // Center the rectangle horizontally (video is centered at videoX, so center rectangle at 0)
+        const borderX = -screenWidth / 2;
+
+        // Use background green color - same as background (0x0E3D27)
+        blurGraphics.beginFill(0x222222, 0.6); // Same green as background, fully opaque
+        blurGraphics.drawRect(
+            borderX,
+            borderY - blurHeight / 2, // Start halfway inside video
+            screenWidth, // Full game field width
+            blurHeight // Extends both into video and below it
+        );
+        blurGraphics.endFill();
+
+        // Apply blur filter to create smooth transition
+        const blurFilter = new BlurFilter();
+        blurFilter.blur = 15; // Blur strength
+        blurGraphics.filters = [blurFilter];
+    }
+
+    /**
+     * Draw inner shadow inside video at bottom edge
+     * Creates effect where background flows into video
+     */
+    drawInnerShadow(shadowGraphics, videoX, videoY, videoWidth, videoHeight) {
+        shadowGraphics.clear();
+
+        const innerShadowHeight = 150; // Height of inner shadow gradient
+        const borderX = videoX - videoWidth / 2;
+        const borderY = videoY + videoHeight / 2; // Bottom edge of video
+
+        // Create smooth gradient from bottom edge upward
+        // Multiple layers for smooth fade
+        const layers = [
+            { a: 0.4, h: 0.15 },   // Strong at bottom edge
+            { a: 0.3, h: 0.15 },
+            { a: 0.22, h: 0.12 },
+            { a: 0.16, h: 0.12 },
+            { a: 0.11, h: 0.1 },
+            { a: 0.07, h: 0.1 },
+            { a: 0.04, h: 0.08 },
+            { a: 0.02, h: 0.08 },
+            { a: 0.01, h: 0.1 },
+        ];
+
+        let offsetY = 0;
+        layers.forEach(layer => {
+            const height = innerShadowHeight * layer.h;
+            shadowGraphics.beginFill(0x000000, layer.a);
+            // Draw inside video, starting from bottom edge going upward
+            shadowGraphics.drawRect(borderX, borderY - offsetY - height, videoWidth, height);
+            shadowGraphics.endFill();
+            offsetY += height;
+        });
+    }
+
+    /**
      * Draw elegant shadow beneath video for professional look
      * Shared method for both background and result videos
      */
     drawVideoShadow(shadowGraphics, videoX, videoY, videoWidth, videoHeight) {
         shadowGraphics.clear();
 
-        const shadowHeight = 25; // Smaller, more subtle shadow
+        // Taller, smoother gradient to blend the video bottom into the background
+        const shadowHeight = 140; // extended height for smoother fade
         const borderX = videoX - videoWidth / 2;
         const borderY = videoY + videoHeight / 2;
 
-        // SUBTLE PROFESSIONAL SHADOW - 8-layer gradient for ultra-smooth blend
-        // Layer 1: Core shadow - lighter for subtlety
-        shadowGraphics.beginFill(0x000000, 0.35);
-        shadowGraphics.drawRect(borderX, borderY, videoWidth, shadowHeight * 0.2);
-        shadowGraphics.endFill();
+        // Bottom fade (10-layer vertical gradient, darkest at the border, then softens)
+        const bottomLayers = [
+            { a: 0.32, h: 0.12 },
+            { a: 0.26, h: 0.12 },
+            { a: 0.20, h: 0.1 },
+            { a: 0.15, h: 0.1 },
+            { a: 0.11, h: 0.1 },
+            { a: 0.08, h: 0.1 },
+            { a: 0.06, h: 0.1 },
+            { a: 0.04, h: 0.1 },
+            { a: 0.025, h: 0.08 },
+            { a: 0.015, h: 0.08 },
+        ];
 
-        // Layer 2: Primary shadow
-        shadowGraphics.beginFill(0x000000, 0.28);
-        shadowGraphics.drawRect(borderX, borderY + shadowHeight * 0.2, videoWidth, shadowHeight * 0.22);
-        shadowGraphics.endFill();
+        let offsetY = 0;
+        bottomLayers.forEach(layer => {
+            const height = shadowHeight * layer.h;
+            shadowGraphics.beginFill(0x000000, layer.a);
+            shadowGraphics.drawRect(borderX, borderY + offsetY, videoWidth, height);
+            shadowGraphics.endFill();
+            offsetY += height;
+        });
 
-        // Layer 3: Mid-tone transition
-        shadowGraphics.beginFill(0x000000, 0.22);
-        shadowGraphics.drawRect(borderX, borderY + shadowHeight * 0.42, videoWidth, shadowHeight * 0.2);
-        shadowGraphics.endFill();
+        // Add a subtle top shadow to soften the upper edge of the video
+        const topShadowHeight = 40; // gentle, small shadow above the video
+        const topLayers = [
+            { a: 0.12, h: 0.25 },
+            { a: 0.08, h: 0.25 },
+            { a: 0.05, h: 0.25 },
+            { a: 0.03, h: 0.25 },
+        ];
 
-        // Layer 4: Soft blend
-        shadowGraphics.beginFill(0x000000, 0.17);
-        shadowGraphics.drawRect(borderX, borderY + shadowHeight * 0.62, videoWidth, shadowHeight * 0.18);
-        shadowGraphics.endFill();
+        let topOffset = 0;
+        topLayers.forEach(layer => {
+            const height = topShadowHeight * layer.h;
+            shadowGraphics.beginFill(0x000000, layer.a);
+            // Draw upward from the top edge of the video
+            shadowGraphics.drawRect(borderX, (videoY - videoHeight / 2) - topOffset - height, videoWidth, height);
+            shadowGraphics.endFill();
+            topOffset += height;
+        });
 
-        // Layer 5: Gentle fade
-        shadowGraphics.beginFill(0x000000, 0.13);
-        shadowGraphics.drawRect(borderX, borderY + shadowHeight * 0.8, videoWidth, shadowHeight * 0.16);
-        shadowGraphics.endFill();
+        // Over-video fade near the bottom edge to make background flow into the video
+        const overFadeHeight = 110; // small overlap inside the video
+        const overLayers = [
+            { a: 0.16, h: 0.18 },
+            { a: 0.12, h: 0.18 },
+            { a: 0.09, h: 0.16 },
+            { a: 0.06, h: 0.16 },
+            { a: 0.04, h: 0.16 },
+            { a: 0.02, h: 0.16 },
+        ];
 
-        // Layer 6: Subtle transition
-        shadowGraphics.beginFill(0x000000, 0.09);
-        shadowGraphics.drawRect(borderX, borderY + shadowHeight * 0.96, videoWidth, shadowHeight * 0.14);
-        shadowGraphics.endFill();
-
-        // Layer 7: Ultra-soft fade out
-        shadowGraphics.beginFill(0x000000, 0.05);
-        shadowGraphics.drawRect(borderX, borderY + shadowHeight * 1.1, videoWidth, shadowHeight * 0.12);
-        shadowGraphics.endFill();
-
-        // Layer 8: Final whisper for seamless blend
-        shadowGraphics.beginFill(0x000000, 0.02);
-        shadowGraphics.drawRect(borderX, borderY + shadowHeight * 1.22, videoWidth, shadowHeight * 0.1);
-        shadowGraphics.endFill();
+        let overOffset = 0;
+        overLayers.forEach(layer => {
+            const height = overFadeHeight * layer.h;
+            // Draw upward inside the video area starting at the bottom edge
+            shadowGraphics.beginFill(0x000000, layer.a);
+            shadowGraphics.drawRect(borderX, borderY - overOffset - height, videoWidth, height);
+            shadowGraphics.endFill();
+            overOffset += height;
+        });
     }
 
     /**
@@ -352,10 +459,30 @@ class VideoManager {
         const scaledVideoWidth = video.videoWidth * actualScale;
         const scaledVideoHeight = video.videoHeight * actualScale;
 
+        // ADD BLURRED BORDER TO RESULT VIDEO
+        if (!this.resultVideoBlurBorder) {
+            this.resultVideoBlurBorder = new Graphics();
+            this.container.addChild(this.resultVideoBlurBorder);
+        }
+        this.drawBlurBorder(this.resultVideoBlurBorder, this.videoSprite.x, this.videoSprite.y, scaledVideoWidth, scaledVideoHeight);
+        this.resultVideoBlurBorder.zIndex = 1001; // Above video sprite
+        this.resultVideoBlurBorder.alpha = 1;
+        this.resultVideoBlurBorder.visible = true;
+
+        // ADD INNER SHADOW TO RESULT VIDEO
+        if (!this.resultVideoInnerShadow) {
+            this.resultVideoInnerShadow = new Graphics();
+            this.container.addChild(this.resultVideoInnerShadow);
+        }
+        this.drawInnerShadow(this.resultVideoInnerShadow, this.videoSprite.x, this.videoSprite.y, scaledVideoWidth, scaledVideoHeight);
+        this.resultVideoInnerShadow.zIndex = 1002; // Above blur border
+        this.resultVideoInnerShadow.alpha = 1;
+        this.resultVideoInnerShadow.visible = true;
+
         // Draw shadow using shared method
         this.drawVideoShadow(this.bottomBorder, this.videoSprite.x, this.videoSprite.y, scaledVideoWidth, scaledVideoHeight);
 
-        this.bottomBorder.zIndex = 1001; // Above video
+        this.bottomBorder.zIndex = 1003; // Above inner shadow
         this.bottomBorder.alpha = 1;
         this.bottomBorder.visible = true;
 
@@ -375,13 +502,17 @@ class VideoManager {
             scaledVideoHeight
         );
         this.resultVideoOverlay.endFill();
-        this.resultVideoOverlay.zIndex = 1002; // Above video and shadow
+        this.resultVideoOverlay.zIndex = 1004; // Above video, blur border, inner shadow, and shadow
         this.resultVideoOverlay.alpha = 1;
         this.resultVideoOverlay.visible = true;
 
         // INSTANT VIDEO APPEARANCE - Video shows immediately for instant switch
         this.videoSprite.alpha = 1;
         this.videoSprite.visible = true;
+        if (this.resultVideoInnerShadow) {
+            this.resultVideoInnerShadow.alpha = 1;
+            this.resultVideoInnerShadow.visible = true;
+        }
         if (this.bottomBorder) {
             this.bottomBorder.alpha = 1;
             this.bottomBorder.visible = true;
@@ -473,6 +604,16 @@ class VideoManager {
             this.videoSprite.alpha = 0;
         }
 
+        if (this.resultVideoBlurBorder) {
+            this.resultVideoBlurBorder.visible = false;
+            this.resultVideoBlurBorder.alpha = 0;
+        }
+
+        if (this.resultVideoInnerShadow) {
+            this.resultVideoInnerShadow.visible = false;
+            this.resultVideoInnerShadow.alpha = 0;
+        }
+
         if (this.bottomBorder) {
             this.bottomBorder.visible = false;
             this.bottomBorder.alpha = 0;
@@ -502,7 +643,15 @@ class VideoManager {
             this.videoSprite.alpha = 1;
             this.videoSprite.visible = true;
 
-            // Show border instantly too
+            // Show blur border, inner shadow and border instantly too
+            if (this.resultVideoBlurBorder) {
+                this.resultVideoBlurBorder.alpha = 1;
+                this.resultVideoBlurBorder.visible = true;
+            }
+            if (this.resultVideoInnerShadow) {
+                this.resultVideoInnerShadow.alpha = 1;
+                this.resultVideoInnerShadow.visible = true;
+            }
             if (this.bottomBorder) {
                 this.bottomBorder.alpha = 1;
                 this.bottomBorder.visible = true;
@@ -528,7 +677,13 @@ class VideoManager {
             currentAlpha += fadeSpeed;
             this.videoSprite.alpha = Math.min(1, currentAlpha);
 
-            // Fade in border with same alpha
+            // Fade in blur border, inner shadow and border with same alpha
+            if (this.resultVideoBlurBorder) {
+                this.resultVideoBlurBorder.alpha = Math.min(1, currentAlpha);
+            }
+            if (this.resultVideoInnerShadow) {
+                this.resultVideoInnerShadow.alpha = Math.min(1, currentAlpha);
+            }
             if (this.bottomBorder) {
                 this.bottomBorder.alpha = Math.min(1, currentAlpha);
             }
@@ -589,7 +744,13 @@ class VideoManager {
                 const newAlpha = startAlpha * (1 - easeProgress);
                 this.videoSprite.alpha = newAlpha;
 
-                // Fade out shadow with same timing
+                // Fade out blur border, inner shadow and shadow with same timing
+                if (this.resultVideoBlurBorder) {
+                    this.resultVideoBlurBorder.alpha = newAlpha;
+                }
+                if (this.resultVideoInnerShadow) {
+                    this.resultVideoInnerShadow.alpha = newAlpha;
+                }
                 if (this.bottomBorder) {
                     this.bottomBorder.alpha = newAlpha;
                 }
@@ -604,6 +765,12 @@ class VideoManager {
                 } else {
                     // Fully faded out
                     this.videoSprite.alpha = 0;
+                    if (this.resultVideoBlurBorder) {
+                        this.resultVideoBlurBorder.alpha = 0;
+                    }
+                    if (this.resultVideoInnerShadow) {
+                        this.resultVideoInnerShadow.alpha = 0;
+                    }
                     if (this.bottomBorder) {
                         this.bottomBorder.alpha = 0;
                     }
@@ -691,9 +858,15 @@ class VideoManager {
             const fadeOut = () => {
                 this.backgroundSprite.alpha = Math.max(0, this.backgroundSprite.alpha - 0.15);
 
-                // Fade out shadow with same timing
+                // Fade out shadow, blur border and inner shadow with same timing
                 if (this.backgroundShadow) {
                     this.backgroundShadow.alpha = this.backgroundSprite.alpha;
+                }
+                if (this.backgroundBlurBorder) {
+                    this.backgroundBlurBorder.alpha = this.backgroundSprite.alpha;
+                }
+                if (this.backgroundInnerShadow) {
+                    this.backgroundInnerShadow.alpha = this.backgroundSprite.alpha;
                 }
 
                 if (this.backgroundSprite.alpha > 0) {
@@ -703,6 +876,12 @@ class VideoManager {
                     this.backgroundSprite.visible = false;
                     if (this.backgroundShadow) {
                         this.backgroundShadow.visible = false;
+                    }
+                    if (this.backgroundBlurBorder) {
+                        this.backgroundBlurBorder.visible = false;
+                    }
+                    if (this.backgroundInnerShadow) {
+                        this.backgroundInnerShadow.visible = false;
                     }
                     if (this.backgroundVideo && this.isBackgroundPlaying) {
                         this.backgroundVideo.pause();
@@ -727,6 +906,16 @@ class VideoManager {
             // INSTANT SHOW: Video appears immediately
             this.backgroundSprite.visible = true;
             this.backgroundSprite.alpha = 1;
+
+            if (this.backgroundBlurBorder) {
+                this.backgroundBlurBorder.visible = true;
+                this.backgroundBlurBorder.alpha = 1;
+            }
+
+            if (this.backgroundInnerShadow) {
+                this.backgroundInnerShadow.visible = true;
+                this.backgroundInnerShadow.alpha = 1;
+            }
 
             if (this.backgroundShadow) {
                 this.backgroundShadow.visible = true;
@@ -811,6 +1000,14 @@ class VideoManager {
                 this.backgroundOverlayDark.alpha = newAlpha;
             }
 
+            if (this.backgroundBlurBorder) {
+                this.backgroundBlurBorder.alpha = newAlpha;
+            }
+
+            if (this.backgroundInnerShadow) {
+                this.backgroundInnerShadow.alpha = newAlpha;
+            }
+
             if (progress < 1) {
                 requestAnimationFrame(smoothFade);
             } else {
@@ -821,6 +1018,12 @@ class VideoManager {
                 }
                 if (this.backgroundOverlayDark) {
                     this.backgroundOverlayDark.visible = false;
+                }
+                if (this.backgroundBlurBorder) {
+                    this.backgroundBlurBorder.visible = false;
+                }
+                if (this.backgroundInnerShadow) {
+                    this.backgroundInnerShadow.visible = false;
                 }
                 if (this.backgroundVideo && this.isBackgroundPlaying) {
                     this.backgroundVideo.pause();
@@ -852,6 +1055,16 @@ class VideoManager {
         if (this.backgroundOverlayDark) {
             this.backgroundOverlayDark.alpha = 0;
             this.backgroundOverlayDark.visible = false;
+        }
+
+        if (this.backgroundBlurBorder) {
+            this.backgroundBlurBorder.alpha = 0;
+            this.backgroundBlurBorder.visible = false;
+        }
+
+        if (this.backgroundInnerShadow) {
+            this.backgroundInnerShadow.alpha = 0;
+            this.backgroundInnerShadow.visible = false;
         }
 
         if (this.backgroundVideo && this.isBackgroundPlaying) {

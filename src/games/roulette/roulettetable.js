@@ -1,4 +1,4 @@
-import { Assets, Sprite, Container, Graphics } from 'pixi.js';
+import { Assets, Sprite, Container, Graphics, Texture, BLEND_MODES } from 'pixi.js';
 import { Action, registerPixiJSActionsMixin } from 'pixijs-actions';
 import { RouletteCfg } from './config';
 import GameState from './gamestate';
@@ -46,27 +46,6 @@ export default class RouletteTabel {
         // Enable z-index sorting on stage
         stage.sortableChildren = true;
 
-        // Add green background rectangle first - directly to stage to ensure it's behind everything
-        const greenBackground = new Graphics();
-        greenBackground.beginFill(0x0e3d27); // Dark green casino color
-        greenBackground.drawRect(0, 0, this.m_app.screen.width * 2, this.m_app.screen.height * 2);
-        greenBackground.endFill();
-        greenBackground.position.set(-this.m_app.screen.width / 2, -this.m_app.screen.height / 2);
-        greenBackground.zIndex = -999; // Ensure it's behind everything
-        greenBackground.eventMode = 'none'; // Disable pointer events so it doesn't block clicks
-        greenBackground.interactive = false; // Make sure it's not interactive
-        stage.addChild(greenBackground);
-        this.greenBackground = greenBackground;
-
-        // Add subtle glowing light in bottom-left corner
-        const bottomLeftGlow = new Graphics();
-        // initial empty draw; will be updated on resize
-        bottomLeftGlow.zIndex = -998; // just above the green background
-        bottomLeftGlow.eventMode = 'none';
-        bottomLeftGlow.interactive = false;
-        stage.addChild(bottomLeftGlow);
-        this.bottomLeftGlow = bottomLeftGlow;
-
         this.bgcontainer = new Container();
         stage.addChild(this.bgcontainer);
 
@@ -81,14 +60,26 @@ export default class RouletteTabel {
         this.resizeTable(true);
     }
     initBackground() {
-        // Additional background in container for scaling
-        const background = new Graphics();
-        background.beginFill(0x0e3d27); // Dark green casino color
-        background.drawRect(-5000, -5000, 10000, 10000);
-        background.endFill();
-        background.eventMode = 'none'; // Disable pointer events
-        background.interactive = false; // Make sure it's not interactive
-        this.bgcontainer.addChild(background);
+        let greenBackground = Sprite.from('assets/images/green-bg.png');
+        greenBackground.anchor.set(0.5, 0.5);
+        greenBackground.position.set(0, 0);
+        this.bgcontainer.addChild(greenBackground);
+        this.greenBackground = greenBackground;
+
+        // Add a soft dark gradient overlay to blend with the video/table area
+        const gradientTexture = this.createVerticalGradientTexture([
+            { offset: 0, color: 'rgba(0, 0, 0, 0.55)' },
+            { offset: 0.4, color: 'rgba(0, 0, 0, 0.28)' },
+            { offset: 1, color: 'rgba(0, 0, 0, 0)' },
+        ]);
+        const gradientOverlay = new Sprite(gradientTexture);
+        gradientOverlay.anchor.set(0.5, 0.5);
+        gradientOverlay.position.set(0, 0);
+        gradientOverlay.width = RouletteCfg.DesiWidth;
+        gradientOverlay.height = RouletteCfg.DesiHeight;
+        gradientOverlay.blendMode = BLEND_MODES.NORMAL;
+        this.bgcontainer.addChild(gradientOverlay);
+        this.gradientOverlay = gradientOverlay;
     }
     initTable() {
         this.mainboard = new MainBoard();
@@ -113,40 +104,27 @@ export default class RouletteTabel {
         let scalew = this.renderwitdth / RouletteCfg.DesiWidth;
         let scaleh = this.renderheight / RouletteCfg.DesiHeight;
 
-        // Update green background to cover only the area below the video
-        if (this.greenBackground) {
-            this.greenBackground.clear();
-            this.greenBackground.beginFill(0x0e3d27);
-
-            // Video is positioned at y=-700 with height ~800, so it ends at y~100
-            // Green background starts from video bottom and extends to bottom of screen
-            const videoBottomY = 500; // Approximate bottom of video in screen space
-            const greenHeight = this.renderheight - videoBottomY;
-
-            this.greenBackground.drawRect(0, videoBottomY, this.renderwitdth, greenHeight);
-            this.greenBackground.endFill();
-            this.greenBackground.position.set(0, 0);
-        }
-
-        // Update bottom-left glow (responsive)
-        if (this.bottomLeftGlow) {
-            this.bottomLeftGlow.clear();
-            // Glow color (soft green-yellow) and sizes scale with screen
-            const glowColor = 0x9be57a;
-            const minSide = Math.min(this.renderwitdth, this.renderheight);
-            const baseRadius = Math.max(60, Math.round(minSide * 0.12));
-            // position a bit inset from the corner
-            const cx = Math.round(this.renderwitdth * 0.08);
-            const cy = Math.round(this.renderheight - this.renderheight * 0.06);
-
-            // Draw concentric circles for a soft radial glow
-            for (let i = 0; i < 6; i++) {
-                const r = Math.round(baseRadius * (1 - i * 0.12));
-                const alpha = 0.18 * Math.max(0.08, 1 - i * 0.18);
-                this.bottomLeftGlow.beginFill(glowColor, alpha);
-                this.bottomLeftGlow.drawCircle(cx, cy, r);
-                this.bottomLeftGlow.endFill();
-            }
+        // Scale background image to cover only the area below the video
+        if (this.greenBackground && this.greenBackground.texture && this.greenBackground.texture.valid) {
+            // Video is positioned at y = -700 with height 800, so bottom is at -700 + 400 = -300
+            // In design coordinates, the video bottom is at approximately -300
+            // Background should start from video bottom and cover to bottom of design area
+            const videoBottomY = -300; // Video bottom in design coordinates
+            const designBottomY = RouletteCfg.DesiHeight / 2; // Bottom of design area (960)
+            const backgroundHeight = designBottomY - videoBottomY; // Height of area below video (1260)
+            
+            // Scale to cover width and the height below video
+            const scaleX = RouletteCfg.DesiWidth / this.greenBackground.texture.width;
+            const scaleY = backgroundHeight / this.greenBackground.texture.height;
+            
+            // Use the larger scale to ensure full coverage
+            const scale = Math.max(scaleX, scaleY);
+            this.greenBackground.scale.set(scale, scale);
+            
+            // Position background to cover area below video
+            // Center horizontally, position vertically so it covers from video bottom to design bottom
+            const backgroundCenterY = (videoBottomY + designBottomY) / 2; // Center of the area below video
+            this.greenBackground.position.set(0, backgroundCenterY);
         }
 
         this.bgcontainer.position.set(this.renderwitdth * 0.5, this.renderheight * 0.5);
@@ -171,6 +149,24 @@ export default class RouletteTabel {
             const tableBoost = 1.2;
             this.mainboard.tableroot.scale.set(tableBoost, tableBoost);
         }
+    }
+
+    /**
+     * Creates a vertical gradient texture using an offscreen canvas.
+     * Stops: array of { offset: 0..1, color: 'rgba(...)' }
+     */
+    createVerticalGradientTexture(stops) {
+        const width = 2;
+        const height = 256;
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, height);
+        stops.forEach(stop => gradient.addColorStop(stop.offset, stop.color));
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+        return Texture.from(canvas);
     }
     // load assets
     async loadGameAssets() {
