@@ -75,7 +75,7 @@ module.exports = {
             new TerserPlugin({
                 test: /\.js(\?.*)?$/i, //需要压缩的文件
                 exclude: [/node_modules/, /\/.\/publish\//],
-                parallel: true,
+                parallel: 2, // Reduce parallelism to save memory (was: true = all CPUs)
                 extractComments: false, //是否将注释剥离到单独的文件中,默认值： true
                 terserOptions: {
                     format: {
@@ -149,6 +149,8 @@ module.exports = {
                 {
                     from: './src/assets/videos/christmas_edition/*',
                     to: 'assets/videos/christmas_edition/[name][ext]',
+                    // Optimize for large files: copy without processing
+                    noErrorOnMissing: true,
                 },
                 {
                     from:'./lang/*',
